@@ -58,7 +58,7 @@ There a large amount of missingnes in this data at 15% of the data missing. Vari
 Interpretation of Plots:
 The total percent of land at some level of flood risk is right skewed and also does not seem to be correlated with the CDC social vulnerability index. I chose to do some plots with this variable because I feel like it offers the most insight into the level of flooding in each community. 
 
-## RQ3: What communities have completed and submitted applications for funding?
+## RQ1: What communities have completed and submitted applications for funding?
 - Within these applicants, what communities received funding? 
 - What are their characteristics?
 - What type of funding did these communities receive? 
@@ -70,46 +70,78 @@ counties1_withdata <- data %>% na.omit()
 
 ```
 
-## RQ1: How is funding distributed by grant administrators?
+## RQ2: How is funding distributed by grant administrators?
 - Is there a correlation between communities funded and the wealth of the community and funding?
 
+## RQ3: What trends exist in the data?
+- What variables influence whether an organization receives funding?
+- To what extent is there equitable distribution of funds?
+- How does flood risk correlate with the amount of funds received if any? 
+
 ```{r}
+#Bar Plot visualizing which communties recieved grants and how much they recieved.
 data %>%
   filter(!is.na(city_town)) %>%
   filter(!is.na(grant_award)) %>%
-  ggplot(aes(x=city_town, fill=grant_award)) + geom_bar()
+  ggplot(aes(y=city_town, fill=grant_award)) + labs(y = "City/Town", x = "Grant Award in Thousands", title = "Grant Awarded to Each City/Town", fill="Grant Awarded") + theme_classic() + geom_bar()
 
 ```
-
-## RQ1: What trends exist in the data?
-What variables influence whether an organization receives funding?
-To what extent is there equitable distribution of funds?
-How does flood risk correlate with the amount of funds received if any? 
-
 ```{r}
-
+#Bar Plot visualizing the CDC social vulnerability index of the communities which received funding
+  data %>%
+  filter(!is.na(city_town)) %>%
+  filter(!is.na(grant_award)) %>%
+  ggplot(aes(y=city_town, fill=social_vulnerability_cdc_index, color=city_town)) + labs(y = "City/Town", x = "Social Vulnerability Index", title = "CDC social vulnerability index of communities who Recieved Grants", fill="Grant Award") + theme_classic() + geom_bar(show.legend = FALSE)
 ```
-
-## RQ3: Is there a correlation between race/socioeconomic status and applying for funding?
-What variables influence whether an organization receives funding?
-To what extent is there equitable distribution of funds?
-How does flood risk correlate with the amount of funds received if any? 
-
 ```{r}
-
+#Histograms visualizing the Per Capita income in 2020 of the communities which received funding
+  data %>%
+  filter(!is.na(city_town)) %>%
+  filter(!is.na(grant_award)) %>%
+  ggplot(aes(x=per_capita_income_in_2020_inflation_adjusted_dollars, fill=city_town), show.legend = FALSE) + labs(x = "Per Capita income in 2020 inflation adjusted dollars", title = "Per Capita Income in 2020 of Communities Which Received a Grant", show.legend = FALSE) + facet_wrap(~city_town) + geom_density(show.legend = FALSE)
 ```
-
-## RQ4: What is the average amount of funds awarded if any?
 ```{r}
-
+#Scatterplot visualizing the relationship between social vulnerability index and percent of area flooded
+  data %>%
+  filter(!is.na(city_town)) %>%
+  filter(!is.na(grant_award)) %>%
+  ggplot(aes(x=social_vulnerability_cdc_index, y=total_percent_of_land_at_some_level_of_flood_risk, fill=city_town, color=city_town)) + labs(x = "Social Vulnerability CDC Index", y="Total percent of Land at Some Level of Flood Risk", title = "Areas with Flood Risk and CDC Social Vulnerability Index", fill="City/Town") + geom_point()
 ```
-
-## RQ4: WWhat distribution does the amount of funds awarded follow if any?
 ```{r}
-
+#Scatterplot visualizing the relationship between grant awarded and percent of area flooded
+  data %>%
+  filter(!is.na(city_town)) %>%
+  filter(!is.na(grant_award)) %>%
+  ggplot(aes(x=grant_award, y=total_percent_of_land_at_some_level_of_flood_risk)) +  labs(x = "Grant Award", y="Total percent of Land at Some Level of Flood Risk", title = "Areas with Flood Risk and Grant Awarded") + geom_point(alpha = 1.5)
 ```
 
 ## RQ4: Is there a correlation between the size of the town and the amount of funds awarded?
 ```{r}
+p1 <- data %>%
+  filter(!is.na(city_town)) %>%
+  filter(!is.na(grant_award)) %>%
+  ggplot(aes(fill=total_population, y=city_town, color=city_town)) + labs(y = "City/Town", x = "Population", title = "Population of each City/Town") + geom_bar(show.legend = FALSE)
 
+p2 <- data %>%
+  filter(!is.na(city_town)) %>%
+  filter(!is.na(grant_award)) %>%
+  ggplot(aes(y=city_town, fill=grant_award)) + labs(y = "City/Town", x = "Grant Award in Thousands", title = "Grant Awarded to Each City/Town", fill="Grant Awarded") + theme_classic() + geom_bar()
+
+p1 + p2
 ```
+```{r}
+#Linear regression on the grant awarded to each city/town
+df1 <- lm(grant_award ~ city_town, data = data %>%
+  filter(!is.na(city_town)) %>%
+  filter(!is.na(grant_award)))
+summary(df1)
+```
+
+```{r}
+#multiple linear regression on the grant award, amount of flooding and the city/town
+df2 <- lm(grant_award + total_percent_of_land_at_some_level_of_flood_risk ~ city_town, data = data %>%
+  filter(!is.na(city_town)) %>%
+  filter(!is.na(grant_award)))
+summary(df2)
+```
+

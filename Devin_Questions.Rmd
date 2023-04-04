@@ -1,0 +1,115 @@
+---
+title: "Week 13 - K-means Clustering"
+author: "Devin Wilson"
+date: "4/3/2023"
+output: html_document
+---
+
+```{r setup, }
+knitr::opts_chunk$set(root.dir='Users/devinwilson/Documents/EDF/Flood_Analysis_PLCY_698') # change for your root directory)
+```
+
+#Running Libraries and Reading in the Data
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(patchwork)
+library(GGally)
+library(tidyverse)
+library(janitor)
+
+setwd('/Users/devinwilson/Documents/EDF/Flood_Analysis_PLCY_698')
+getwd()
+
+data <- read_csv('final_data_with_golden_leaf.csv')
+data <- clean_names(data)
+```
+
+## EDA 
+
+```{r cars}
+#install Packages
+library(visdat)
+library(naniar)
+
+# visualize missingness
+vis_miss(data)
+vis_dat(data)
+data %>% summarise(across(everything(), ~ mean(is.na(.))))
+
+#Looking at summary statistics
+glimpse(data)
+summary(data)
+
+#Exploring the Data through some plots
+  #Histogram
+  ggplot(data, aes(x=total_percent_of_land_at_some_level_of_flood_risk)) +
+  geom_histogram()
+  
+  #Scatterplot
+  ggplot(data, aes(x=total_percent_of_land_at_some_level_of_flood_risk, y=social_vulnerability_cdc_index)) +
+  geom_point()
+
+```
+Interpretation of missingness: 
+There a large amount of missingnes in this data at 15% of the data missing. Variables which were missing over 70% of their data include: Place ID, County, City/Town, Encumbered ($), Grant Award (4), Award Date, Funding Decision Year, Total Project Budget, Funding Request, StateEgency REquested for Funding, Application Date, Application Number, Project Title, Projcet Description, Applicant, Applicant Type, Project Type. The missing variables came from  the grant data that was provided by the Golden Leaf Foundation.
+
+Interpretation of Plots:
+The total percent of land at some level of flood risk is right skewed and also does not seem to be correlated with the CDC social vulnerability index. I chose to do some plots with this variable because I feel like it offers the most insight into the level of flooding in each community. 
+
+## RQ3: What communities have completed and submitted applications for funding?
+- Within these applicants, what communities received funding? 
+- What are their characteristics?
+- What type of funding did these communities receive? 
+- Who are key people to their application?
+- What organizational infrastructure do they have to support the deployment of funding?
+
+```{r}
+counties1_withdata <- data %>% na.omit()
+
+```
+
+## RQ1: How is funding distributed by grant administrators?
+- Is there a correlation between communities funded and the wealth of the community and funding?
+
+```{r}
+data %>%
+  filter(!is.na(city_town)) %>%
+  filter(!is.na(grant_award)) %>%
+  ggplot(aes(x=city_town, fill=grant_award)) + geom_bar()
+
+```
+
+## RQ1: What trends exist in the data?
+What variables influence whether an organization receives funding?
+To what extent is there equitable distribution of funds?
+How does flood risk correlate with the amount of funds received if any? 
+
+```{r}
+
+```
+
+## RQ3: Is there a correlation between race/socioeconomic status and applying for funding?
+What variables influence whether an organization receives funding?
+To what extent is there equitable distribution of funds?
+How does flood risk correlate with the amount of funds received if any? 
+
+```{r}
+
+```
+
+## RQ4: What is the average amount of funds awarded if any?
+```{r}
+
+```
+
+## RQ4: WWhat distribution does the amount of funds awarded follow if any?
+```{r}
+
+```
+
+## RQ4: Is there a correlation between the size of the town and the amount of funds awarded?
+```{r}
+
+```

@@ -148,5 +148,21 @@ data %>%
 
 
 
+```{r}
+options(tigris_use_cache = TRUE)
+
+# get data
+nc <- get_acs(geography = "county",  
+              state = "NC",
+              geometry="TRUE",
+              year = 2020)
+
+# plot
+  golden_leaf %>% ggplot(aes(fill = estimate)) + 
+  geom_sf(color = NA) + 
+  coord_sf() + 
+  scale_fill_viridis_c(option = "magma") +
+  theme_classic()
+```
 
 

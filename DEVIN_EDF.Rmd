@@ -17,7 +17,7 @@ When you click the **Knit** button a document will be generated that includes bo
 ```{r cars}
 setwd('/Users/devinwilson/Documents/EDF/Flood_Analysis_PLCY_698')
 getwd()
-golden_leaf <- read_csv('final_data_with_golden_leaf_copy.csv')
+golden_leaf <- read_csv('golden_leaf.csv')
 ```
 
 ## Including Plots
@@ -32,3 +32,11 @@ write.table(golden_leaf, file="golden_leaf.csv", sep=",")
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+golden_leaf %>% ggplot(aes(x=total_percent_of_land_at_some_level_of_flood_risk, y=county_name, fill=city_town)) + xlim(0, 100) + labs(y = "County", x = "Percent of Land at Flood Risk", title = "Percent of Land at Flood Risk in each County", subtitle = "Communtities Which Recieved Funding") + geom_col(show.legend = TRUE)
+```
+
+```{r}
+golden_leaf %>% ggplot(aes(y=county_name, x=grant_award, fill = grant_award)) + labs(y = "County", x = "Grant Award in Thousands", title = "Grant Awarded to Each County") + theme_classic() + geom_col()
+```
+

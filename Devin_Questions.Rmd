@@ -85,7 +85,7 @@ counties1_withdata <- data %>% na.omit()
 data %>%
   filter(!is.na(city_town)) %>%
   filter(!is.na(grant_award)) %>%
-  ggplot(aes(y=city_town, fill=grant_award)) + labs(y = "City/Town", x = "Grant Award in Thousands", title = "Grant Awarded to Each City/Town", fill="Grant Awarded") + theme_classic() + geom_bar()
+  ggplot(aes(y=city_town, x=grant_award, fill = grant_award)) + labs(y = "City/Town", x = "Grant Award in Thousands", title = "Grant Awarded to Each City/Town") + theme_classic() + geom_col()
 
 ```
 ```{r}
@@ -114,7 +114,7 @@ data %>%
   data %>%
   filter(!is.na(city_town)) %>%
   filter(!is.na(grant_award)) %>%
-  ggplot(aes(x=grant_award, y=total_percent_of_land_at_some_level_of_flood_risk)) +  labs(x = "Grant Award", y="Total percent of Land at Some Level of Flood Risk", title = "Areas with Flood Risk and Grant Awarded") + geom_point(alpha = 1.5)
+  ggplot(aes(x=grant_award, y=total_percent_of_land_at_some_level_of_flood_risk, fill=city_town, color=city_town)) +  labs(x = "Grant Award", y="Total percent of Land at Some Level of Flood Risk", title = "Areas with Flood Risk and Grant Awarded") + geom_point(alpha = 1.5)
 ```
 
 ## RQ4: Is there a correlation between the size of the town and the amount of funds awarded?
@@ -128,7 +128,7 @@ p1 <-
 p2 <- data %>%
   filter(!is.na(city_town)) %>%
   filter(!is.na(grant_award)) %>%
-  ggplot(aes(y=city_town, fill=grant_award)) + labs(y = "City/Town", x = "Grant Award in Thousands", title = "Grant Awarded to Each City/Town", fill="Grant Awarded") + theme_classic() + geom_bar()
+  ggplot(aes(y=city_town, fill=grant_award)) + labs(y = "City/Town", x = "Grant Award in Thousands", title = "Grant Awarded to Each City/Town", fill="Grant Awarded") + theme_classic() + geom_col()
 
 p1 + p2
 ```
@@ -136,33 +136,56 @@ p1 + p2
 data %>%
   filter(!is.na(city_town)) %>%
   filter(!is.na(grant_award)) %>%
-  ggplot(aes(y=city_town, fill=grant_award)) + labs(y = "City/Town", x = "Grant Award in Thousands", title = "Grant Awarded to Each City/Town", fill="Grant Awarded") + theme_classic() + geom_bar()
+  ggplot(aes(x=grant_award, fill=city_town)) + labs(y = "City/Town", x = "Grant Award in Thousands", title = "Grant Awarded to Each City/Town", fill="Grant Awarded") + theme_classic() + geom_bar()
 ```
 ```{r}
 data %>%
   filter(!is.na(city_town)) %>%
   filter(!is.na(grant_award)) %>%
-  ggplot(aes(fill=total_percent_of_land_at_some_level_of_flood_risk, y=city_town, color=city_town)) + labs(y = "City/Town", x = "Percent of Land at Flood Risk", title = "Percent of Land at Flood Risk in each City/Town", subtitle = "Communtities Which Recieved Funding") + geom_bar(show.legend = FALSE)
+  ggplot(aes(y=total_percent_of_land_at_some_level_of_flood_risk, x=grant_award, fill=city_town, color=city_town)) + labs(y = "City/Town", x = "Grant Award in Thousands", title = "Grant Awarded to Each City/Town", fill="Grant Awarded") + theme_classic() + geom_point()
+```
+
+```{r}
+data %>%
+  filter(!is.na(city_town)) %>%
+  filter(!is.na(grant_award)) %>%
+  select(-c('county')) %>% 
+  ggplot(aes(x=total_percent_of_land_at_some_level_of_flood_risk, y=city_town, fill=city_town)) + labs(y = "City/Town", x = "Percent of Land at Flood Risk", title = "Percent of Land at Flood Risk in each City/Town", subtitle = "Communtities Which Recieved Funding") + geom_col(show.legend = FALSE)
 ```
 
 
 
 
 ```{r}
-options(tigris_use_cache = TRUE)
+#This is where I did a subset of the merged dataset and created a smaller dataset called "golden_leaf". This took some data from the existing EDF database and some from the Golden Leaf data but only includes those counties which recieved funding.
+golden_leaf <- golden_leaf %>% clean_names() %>% filter(!is.na(city_town)) %>%
+  filter(!is.na(grant_award))
 
-# get data
-nc <- get_acs(geography = "county",  
-              state = "NC",
-              geometry="TRUE",
-              year = 2020)
+#this is where I exported the file to a new .csv file
+write.table(golden_leaf, file="golden_leaf.csv", sep=",")
+```
 
-# plot
-  golden_leaf %>% ggplot(aes(fill = estimate)) + 
-  geom_sf(color = NA) + 
-  coord_sf() + 
-  scale_fill_viridis_c(option = "magma") +
-  theme_classic()
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+#This is where I created a plot of each NC County and their percent of flood risk. 
+golden_leaf %>% ggplot(aes(x=total_percent_of_land_at_some_level_of_flood_risk, y=county_name)) + xlim(0, 100) + labs(y = "County", x = "Percent of Land at Flood Risk", title = "Percent of Land at Flood Risk in Each County", subtitle = "Communtities Which Recieved Funding") + geom_col(show.legend = TRUE)
+```
+
+```{r}
+#This is where I created a plot of each NC County and the grant they were awarded. The x-axis goes up to 300,000.
+golden_leaf %>% ggplot(aes(y=county_name, x=grant_award)) + xlim(0, 300000)+ labs(y = "County", x = "Grant Award in Thousands", title = "Grant Awarded to Each County") + theme_classic() + geom_col()
+```
+```
+```{r}
+#This is where I created a new variable grant/per population
+golden_leaf2 <- golden_leaf %>%
+  mutate(grant_per_person = grant_award/ total_population)
+```
+
+```{r}
+#This is where I created a new variable grant/per amount of communtiy at flood risk
+golden_leaf2 <- golden_leaf2 %>%
+  mutate(grant_per_percent_of_land_at_some_level_of_flood_risk = grant_award/ total_percent_of_land_at_some_level_of_flood_risk)
 ```
 
 
